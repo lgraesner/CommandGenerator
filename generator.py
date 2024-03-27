@@ -100,7 +100,8 @@ if __name__ == "__main__":
                   "'3': Command with manipulation,\n" \
                   "'4': Batch of three commands,\n" \
                   "'5': Generate EGPSR setup,\n" \
-                  "'0': Generate QR code,\n" \
+                  "'0': Generate QR code for the last command,\n" \
+                  "'-n [number]': run command multiple times,\n" \
                   "'q': Quit"
     print(user_prompt)
     command = ""
@@ -115,70 +116,69 @@ if __name__ == "__main__":
         while True:
             # Read user input
             user_input = input()
+            count = 1
 
-            # Check user input
-            if user_input == '1':
-                command = generator.generate_command_start(cmd_category="")
-                last_input = "1"
-            elif user_input == '2':
-                command = generator.generate_command_start(cmd_category="people")
-                last_input = "2"
-            elif user_input == '3':
-                command = generator.generate_command_start(cmd_category="objects")
-                last_input = "3"
-            elif user_input == '4':
-                command_one = generator.generate_command_start(cmd_category="people")
-                command_two = generator.generate_command_start(cmd_category="objects")
-                command_three = generator.generate_command_start(cmd_category="")
-                command_list = [command_one[0].upper() + command_one[1:], command_two[0].upper() + command_two[1:],
-                                command_three[0].upper() + command_three[1:]]
-                random.shuffle(command_list)
-                command = command_list[0] + "\n" + command_list[1] + "\n" + command_list[2]
-                last_input = "4"
-            elif user_input == "5":
-                command = egpsr_generator.generate_setup()
-                last_input = "5"
-            elif user_input == 'q':
-                break
-            elif user_input == '0':
-                if last_input == '4':
-                    commands = command_list
-                else:
-                    commands = [command]
-                for c in commands:
-                    qr.clear()
-                    qr.add_data(c)
-                    qr.make(fit=True)
+            #check optional arguments
+            argument = re.search(r'-n\s+(\d+)', user_input)
+            if argument : count = int(argument.group(1))
 
-                    img = qr.make_image(fill_color="black", back_color="white")
-                    # Create a drawing object
-                    draw = ImageDraw.Draw(img)
+            for i in range(count):
+                # Check user input
+                if user_input[0] == '1':
+                    command = generator.generate_command_start(cmd_category="")
+                    last_input = "1"
+                elif user_input[0] == '2':
+                    command = generator.generate_command_start(cmd_category="people")
+                    last_input = "2"
+                elif user_input[0] == '3':
+                    command = generator.generate_command_start(cmd_category="objects")
+                    last_input = "3"
+                elif user_input[0] == '4':
+                    command_one = generator.generate_command_start(cmd_category="people")
+                    command_two = generator.generate_command_start(cmd_category="objects")
+                    command_three = generator.generate_command_start(cmd_category="")
+                    command_list = [command_one[0].upper() + command_one[1:], command_two[0].upper() + command_two[1:],
+                                    command_three[0].upper() + command_three[1:]]
+                    random.shuffle(command_list)
+                    command = command_list[0] + "\n" + command_list[1] + "\n" + command_list[2]
+                    last_input = "4"
+                elif user_input[0] == "5":
+                    command = egpsr_generator.generate_setup()
+                    last_input = "5"
+                elif user_input[0] == 'q':
+                    quit()
+                elif user_input[0] == '0':
+                    if last_input == '4':
+                        commands = command_list
+                    else:
+                        commands = [command]
+                    for c in commands:
+                        qr.clear()
+                        qr.add_data(c)
+                        qr.make(fit=True)
 
-                    # Load a font
-                    font = ImageFont.truetype("Arial.ttf", 30)
+                        img = qr.make_image(fill_color="black", back_color="white")
+                        # Create a drawing object
+                        draw = ImageDraw.Draw(img)
 
-                    # Calculate text size and position
-                    text_size = draw.textsize(c, font)
-                    if text_size[0] > img.size[0]:
-                        font = ImageFont.truetype("Arial.ttf", 15)
+                        # Load a font
+                        font = ImageFont.truetype("Arial.ttf", 30)
+
+                        # Calculate text size and position
                         text_size = draw.textsize(c, font)
-                    text_position = ((img.size[0] - text_size[0]) // 2, img.size[1] - text_size[1] - 10)
+                        if text_size[0] > img.size[0]:
+                            font = ImageFont.truetype("Arial.ttf", 15)
+                            text_size = draw.textsize(c, font)
+                        text_position = ((img.size[0] - text_size[0]) // 2, img.size[1] - text_size[1] - 10)
 
-                    # Draw text on the image
-                    draw.text(text_position, c, font=font, fill="black")
-                    img.show()
-            else:
-                print(user_prompt)
-                continue
-            command = command[0].upper() + command[1:]
-            print(command)
+                        # Draw text on the image
+                        draw.text(text_position, c, font=font, fill="black")
+                        img.show()
+                else:
+                    print(user_prompt)
+                    break
+                command = command[0].upper() + command[1:]
+                print(command)
 
     except KeyboardInterrupt:
         print("KeyboardInterrupt. Exiting the loop.")
-
-    # for _ in range(500):  # Generate 50 random commands
-    #     generator = CommandGenerator(names, location_names, placement_location_names, room_names, object_names,
-    #                                  object_categories_plural, object_categories_singular)
-    #     command = generator.generate_command_start(cmd_category="")
-    #     command = command[0].upper() + command[1:]
-    #     print(command)
