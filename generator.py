@@ -116,13 +116,13 @@ if __name__ == "__main__":
         while True:
             # Read user input
             user_input = input()
-            count = 1
+            
 
             #check optional arguments
             argument = re.search(r'-n\s+(\d+)', user_input)
-            if argument : count = int(argument.group(1))
+            command_count = 1 if (argument is None) else int(argument.group(1))
 
-            for i in range(count):
+            for i in range(command_count):
                 # Check user input
                 if user_input[0] == '1':
                     command = generator.generate_command_start(cmd_category="")
