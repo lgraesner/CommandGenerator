@@ -5,6 +5,7 @@ import qrcode
 from PIL import Image, ImageDraw, ImageFont
 from gpsr_commands import CommandGenerator
 from egpsr_commands import EgpsrCommandGenerator
+import yaml
 
 
 def read_data(file_path):
@@ -79,6 +80,10 @@ if __name__ == "__main__":
     locations_file_path = '../maps/location_names.md'
     rooms_file_path = '../maps/room_names.md'
     objects_file_path = '../objects/test.md'
+    yaml_file = open("NLA_YAML.yaml", "w")
+
+    examples = {}
+    examples["nlu"] = []
 
     names_data = read_data(names_file_path)
     names = parse_names(names_data)
@@ -98,10 +103,10 @@ if __name__ == "__main__":
     user_prompt = "'1': Any command,\n" \
                   "'2': Command without manipulation,\n" \
                   "'3': Command with manipulation,\n" \
-                  "'4': Batch of three commands,\n" \
                   "'5': Generate EGPSR setup,\n" \
                   "'0': Generate QR code for the last command,\n" \
                   "'-n [number]': run command multiple times,\n" \
+                  "'s': Save YAML file\n" \
                   "'q': Quit"
     print(user_prompt)
     command = ""
@@ -117,41 +122,30 @@ if __name__ == "__main__":
             # Read user input
             user_input = input()
             
-
             #check optional arguments
             argument = re.search(r'-n\s+(\d+)', user_input)
             command_count = 1 if (argument is None) else int(argument.group(1))
 
             for i in range(command_count):
+                command = ""
+                intents = []
                 # Check user input
                 if user_input[0] == '1':
-                    command = generator.generate_command_start(cmd_category="")
+                    command, intents = generator.generate_command_start(cmd_category="")
                     last_input = "1"
                 elif user_input[0] == '2':
-                    command = generator.generate_command_start(cmd_category="people")
+                    command, intents = generator.generate_command_start(cmd_category="people")
                     last_input = "2"
                 elif user_input[0] == '3':
-                    command = generator.generate_command_start(cmd_category="objects")
+                    command, intents = generator.generate_command_start(cmd_category="objects")
                     last_input = "3"
-                elif user_input[0] == '4':
-                    command_one = generator.generate_command_start(cmd_category="people")
-                    command_two = generator.generate_command_start(cmd_category="objects")
-                    command_three = generator.generate_command_start(cmd_category="")
-                    command_list = [command_one[0].upper() + command_one[1:], command_two[0].upper() + command_two[1:],
-                                    command_three[0].upper() + command_three[1:]]
-                    random.shuffle(command_list)
-                    command = command_list[0] + "\n" + command_list[1] + "\n" + command_list[2]
-                    last_input = "4"
                 elif user_input[0] == "5":
-                    command = egpsr_generator.generate_setup()
+                    command, intents = egpsr_generator.generate_setup()
                     last_input = "5"
                 elif user_input[0] == 'q':
                     quit()
                 elif user_input[0] == '0':
-                    if last_input == '4':
-                        commands = command_list
-                    else:
-                        commands = [command]
+                    commands = [command]
                     for c in commands:
                         qr.clear()
                         qr.add_data(c)
@@ -174,11 +168,29 @@ if __name__ == "__main__":
                         # Draw text on the image
                         draw.text(text_position, c, font=font, fill="black")
                         img.show()
+                elif user_input[0] == 's':
+                    print(examples)
+                    print(yaml.dump(examples, yaml_file))
+                    break
+
+                    
                 else:
                     print(user_prompt)
                     break
-                command = command[0].upper() + command[1:]
-                print(command)
+                intents = '+'.join(intents)
 
+                entry = {}
+                entry["intent"] = intents
+                entry["examples"] = [command]
+                
+                present = False
+                for e in examples["nlu"]:
+                    if e["intent"] == entry["intent"]:
+                        e["examples"].append(command)
+                        present = True
+                if not present:
+                    examples["nlu"].append(entry)
+
+                
     except KeyboardInterrupt:
         print("KeyboardInterrupt. Exiting the loop.")
