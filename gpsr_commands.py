@@ -107,22 +107,22 @@ class CommandGenerator:
         command_string = ""
         intents = [command]
         if command == "goToLoc":
-            command_string = "{goVerb} {toLocPrep} the {loc_room} then "
+            command_string = "{goVerb} {toLocPrep} the {loc_roomSRC} then "
             followup, folloup_intents = self.generate_command_followup("atLoc", cmd_category, difficulty)
             command_string += followup
             intents += folloup_intents
         elif command == "takeObjFromPlcmt":
-            command_string = "{takeVerb} {art} {obj_singCat} {fromLocPrep} the {plcmtLoc} and "
+            command_string = "{takeVerb} {art} {obj_singCat} {fromLocPrep} the {plcmtLocSRC} and "
             followup, folloup_intents = self.generate_command_followup("hasObj", cmd_category, difficulty)
             command_string += followup
             intents += folloup_intents
         elif command == "findPrsInRoom":
-            command_string = "{findVerb} a {gestPers_posePers} {inLocPrep} the {room} and "
+            command_string = "{findVerb} a {gestPers_posePers} {inLocPrep} the {roomSRC} and "
             followup, folloup_intents = self.generate_command_followup("foundPers", cmd_category, difficulty)
             command_string += followup
             intents += folloup_intents
         elif command == "findObjInRoom":
-            command_string = "{findVerb} {art} {obj_singCat} {inLocPrep} the {room} then "
+            command_string = "{findVerb} {art} {obj_singCat} {inLocPrep} the {roomSRC} then "
             followup, folloup_intents = self.generate_command_followup("foundObj", cmd_category, difficulty)
             command_string += followup
             intents += folloup_intents
@@ -140,9 +140,9 @@ class CommandGenerator:
         elif command == "tellObjPropOnPlcmt":
             command_string = "{tellVerb} me what is the {objComp} object {onLocPrep} the {plcmtLocSRC}"
         elif command == "talkInfoToGestPrsInRoom":
-            command_string = "{talkVerb} {talk} {talkPrep} the {gestPers} {inLocPrep} the {room}"
+            command_string = "{talkVerb} {talk} {talkPrep} the {gestPers} {inLocPrep} the {roomSRC}"
         elif command == "answerToGestPrsInRoom":
-            command_string = "{answerVerb} the {question} {ofPrsPrep} the {gestPers} {inLocPrep} the {room}"
+            command_string = "{answerVerb} the {question} {ofPrsPrep} the {gestPers} {inLocPrep} the {roomSRC}"
         elif command == "followNameFromBeacToRoom":
             command_string = "{followVerb} {name} {fromLocPrep} the {locSRC} {toLocPrep} the {roomDEST}"
         elif command == "guideNameFromBeacToBeac":
@@ -156,7 +156,7 @@ class CommandGenerator:
         elif command == "tellCatPropOnPlcmt":
             command_string = "{tellVerb} me what is the {objComp} {singCat} {onLocPrep} the {plcmtLocSRC}"
         elif command == "greetClothDscInRm":
-            command_string = "{greetVerb} the person wearing {art} {colorClothe} {inLocPrep} the {room} and "
+            command_string = "{greetVerb} the person wearing {art} {colorClothe} {inLocPrep} the {roomSRC} and "
             followup, folloup_intents = self.generate_command_followup("foundPers", cmd_category, difficulty)
             command_string += followup
             intents += folloup_intents
@@ -187,7 +187,6 @@ class CommandGenerator:
         print(command_string)
         art_ph = re.findall(r'\{(art)\}\s*\[?([A-Za-z])', command_string, re.DOTALL)
         if art_ph:
-            print("ARTPH found: ",art_ph)
             command_string = command_string.replace("{art}", "an" if art_ph[0][1].lower() in ["a", "e", "i", "o", "u"] else "a")
 
         # restore RASA curly brackets
@@ -241,7 +240,7 @@ class CommandGenerator:
         elif command == "deliverObjToNameAtBeac":
             command_string = "{deliverVerb} it {deliverPrep} {name} {inLocPrep} the {roomDEST}"
         elif command == "talkInfo":
-            command_string = "{talkVerb} {talk}}"
+            command_string = "{talkVerb} {talk}"
         elif command == "answerQuestion":
             command_string = "{answerVerb} a {question}"
         elif command == "followPrs":
@@ -324,21 +323,21 @@ class CommandGenerator:
             return random.choice(self.connector_list)
 
         elif ph == "plcmtLoc2":
-            return "plcmtLoc2"
+            return "[" + random.choice(self.placement_location_names) + "]<\"entity\": \"location_placement\"" + order + ">"
         elif ph == "plcmtLoc":
             return "[" + random.choice(self.placement_location_names) + "]<\"entity\": \"location_placement\"" + order + ">"
         elif ph == "room2":
-            return "room2"
+            return "[" + random.choice(self.room_names) + "]<\"entity\": \"room\"" + order + ">"
         elif ph == "room":
             return "[" + random.choice(self.room_names) + "]<\"entity\": \"room\"" + order + ">"
         elif ph == "loc2":
-            return "loc2"
+            return "[" + random.choice(self.location_names) + "]<\"entity\": \"location\"" + order + ">"
         elif ph == "loc":
             return "[" + random.choice(self.location_names) + "]<\"entity\": \"location\"" + order + ">"
         elif ph == "inRoom":
             return random.choice(self.prep_dict["inLocPrep"]) + " the " + "[" + random.choice(self.room_names) + "]<\"entity\": \"room\"" + order + ">"
         elif ph == "atLoc":
-            return "[" + random.choice(self.prep_dict["atLocPrep"]) + " the " + "[" + random.choice(self.location_names) + "]<\"entity\": \"location\"" + order + ">"
+            return random.choice(self.prep_dict["atLocPrep"]) + " the " + "[" + random.choice(self.location_names) + "]<\"entity\": \"location\"" + order + ">"
 
         elif ph == "gestPers":
             return "[" + random.choice(self.gesture_person_list) + "]<\"entity\": \"gesture_person\">"

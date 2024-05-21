@@ -170,6 +170,9 @@ if __name__ == "__main__":
                         img.show()
                 elif user_input[0] == 's':
                     print(examples)
+                    for e in examples["nlu"]:
+                        count = len(e["examples"])
+                        e["examples"] = list(set(e["examples"]))[0:min(count, 10)]  #limit examples to 10 and remove duplicates
                     print(yaml.dump(examples, yaml_file))
                     break
 
