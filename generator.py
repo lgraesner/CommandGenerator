@@ -79,7 +79,7 @@ if __name__ == "__main__":
     names_file_path = '../names/names.md'
     locations_file_path = '../maps/location_names.md'
     rooms_file_path = '../maps/room_names.md'
-    objects_file_path = '../objects/test.md'
+    objects_file_path = '../objects/objects.md'
     yaml_file = open("NLA_YAML.yaml", "w")
 
     examples = {}
@@ -171,9 +171,10 @@ if __name__ == "__main__":
                 elif user_input[0] == 's':
                     print(examples)
                     for e in examples["nlu"]:
+                        eSet = set(e["examples"])
                         count = len(e["examples"])
-                        e["examples"] = list(set(e["examples"]))[0:min(count, 10)]  #limit examples to 10 and remove duplicates
-                    print(yaml.dump(examples, yaml_file))
+                        e["examples"] = list(eSet)[0:min(count, 15)]  #limit examples to 10 and remove duplicates
+                    print(yaml.dump(examples, yaml_file, width=10000))
                     break
 
                     
