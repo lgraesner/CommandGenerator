@@ -79,7 +79,7 @@ if __name__ == "__main__":
     names_file_path = '../names/names.md'
     locations_file_path = '../maps/location_names.md'
     rooms_file_path = '../maps/room_names.md'
-    objects_file_path = '../objects/objects.md'
+    objects_file_path = '../objects/test.md'
     yaml_file = open("NLA_YAML.yaml", "w")
 
     examples = {}
