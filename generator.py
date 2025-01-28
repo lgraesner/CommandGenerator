@@ -170,11 +170,13 @@ if __name__ == "__main__":
                         img.show()
                 elif user_input[0] == 's':
                     print(examples)
+                    exampleCountMax = 15
                     for e in examples["nlu"]:
                         eSet = set(e["examples"])
                         count = len(e["examples"])
-                        e["examples"] = list(eSet)[0:min(count, 15)]  #limit examples to 10 and remove duplicates
+                        e["examples"] = list(eSet)[0:min(count, exampleCountMax)]  #limit examples to 10 and remove duplicates
                     print(yaml.dump(examples, yaml_file, width=10000))
+                    print(f"Succes, saved up to {exampleCountMax} examples for {len(examples["nlu"])} command variations")
                     break
 
                     
